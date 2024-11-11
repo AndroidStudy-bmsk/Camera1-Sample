@@ -19,7 +19,6 @@ package com.google.android.cameraview;
 import android.annotation.SuppressLint;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.support.v4.util.SparseArrayCompat;
 import android.view.SurfaceHolder;
 
 import java.io.IOException;
@@ -27,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import androidx.collection.SparseArrayCompat;
 
 
 @SuppressWarnings("deprecation")
@@ -72,13 +73,10 @@ class Camera1 extends CameraViewImpl {
 
     Camera1(Callback callback, PreviewImpl preview) {
         super(callback, preview);
-        preview.setCallback(new PreviewImpl.Callback() {
-            @Override
-            public void onSurfaceChanged() {
-                if (mCamera != null) {
-                    setUpPreview();
-                    adjustCameraParameters();
-                }
+        preview.setCallback(() -> {
+            if (mCamera != null) {
+                setUpPreview();
+                adjustCameraParameters();
             }
         });
     }
@@ -217,12 +215,7 @@ class Camera1 extends CameraViewImpl {
         }
         if (getAutoFocus()) {
             mCamera.cancelAutoFocus();
-            mCamera.autoFocus(new Camera.AutoFocusCallback() {
-                @Override
-                public void onAutoFocus(boolean success, Camera camera) {
-                    takePictureInternal();
-                }
-            });
+            mCamera.autoFocus((success, camera) -> takePictureInternal());
         } else {
             takePictureInternal();
         }
@@ -230,14 +223,11 @@ class Camera1 extends CameraViewImpl {
 
     void takePictureInternal() {
         if (!isPictureCaptureInProgress.getAndSet(true)) {
-            mCamera.takePicture(null, null, null, new Camera.PictureCallback() {
-                @Override
-                public void onPictureTaken(byte[] data, Camera camera) {
-                    isPictureCaptureInProgress.set(false);
-                    mCallback.onPictureTaken(data);
-                    camera.cancelAutoFocus();
-                    camera.startPreview();
-                }
+            mCamera.takePicture(null, null, null, (data, camera) -> {
+                isPictureCaptureInProgress.set(false);
+                mCallback.onPictureTaken(data);
+                camera.cancelAutoFocus();
+                camera.startPreview();
             });
         }
     }
@@ -367,10 +357,11 @@ class Camera1 extends CameraViewImpl {
 
     /**
      * Calculate display orientation
-     * https://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
-     *
+     * https://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation
+     * (int)
+     * <p>
      * This calculation is used for orienting the preview
-     *
+     * <p>
      * Note: This is not the same calculation as the camera rotation
      *
      * @param screenOrientationDegrees Screen orientation in degrees
@@ -386,10 +377,10 @@ class Camera1 extends CameraViewImpl {
 
     /**
      * Calculate camera rotation
-     *
+     * <p>
      * This calculation is applied to the output JPEG either via Exif Orientation tag
      * or by actually transforming the bitmap. (Determined by vendor camera API implementation)
-     *
+     * <p>
      * Note: This is not the same calculation as the display orientation
      *
      * @param screenOrientationDegrees Screen orientation in degrees
@@ -411,8 +402,8 @@ class Camera1 extends CameraViewImpl {
      * @return True if in landscape, false if portrait
      */
     private boolean isLandscape(int orientationDegrees) {
-        return (orientationDegrees == Constants.LANDSCAPE_90 ||
-                orientationDegrees == Constants.LANDSCAPE_270);
+        return (orientationDegrees == Constants.LANDSCAPE_90
+                || orientationDegrees == Constants.LANDSCAPE_270);
     }
 
     /**

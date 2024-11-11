@@ -1,0 +1,36 @@
+# gradle/libs.versions.toml
+
+[versions]
+# SDK versions
+compileSdk = "34"
+buildTools = "33.0.0"
+minSdk = "21"
+targetSdk = "34"
+
+# Library versions
+appcompat = "1.7.0"
+material = "1.12.0"
+junit = "4.13.2"
+testRunner = "1.6.2"
+espressoCore = "3.6.1"
+annotation = "1.9.1"
+legacySupport = "1.0.0"
+
+# Plugin versions
+androidGradlePlugin = "8.1.4"
+
+[libraries]
+# AndroidX libraries
+appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
+legacySupport = { module = "androidx.legacy:legacy-support-v4", version.ref = "legacySupport" }
+
+# Test libraries
+junit = { module = "junit:junit", version.ref = "junit" }
+testRunner = { module = "androidx.test:runner", version.ref = "testRunner" }
+espressoCore = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "androidGradlePlugin" }
+androidLibrary = { id = "com.android.library", version.ref = "androidGradlePlugin" }

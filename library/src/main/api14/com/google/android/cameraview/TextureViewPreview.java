@@ -25,7 +25,8 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 
-@TargetApi(14)
+import com.google.cameraview.library.R;
+
 class TextureViewPreview extends PreviewImpl {
 
     private final TextureView mTextureView;
